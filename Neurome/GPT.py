@@ -1,6 +1,6 @@
-from tensorflow import keras
-import numpy as np 
 
+import numpy as np 
+#   ///////////// PREREQUISUTS ///////////// 
 class layers:
     def __init__(self,inputs,neurons,activation = "relu"):
         self.inputs = np.append(1,np.array(inputs))
@@ -22,6 +22,7 @@ class layers:
 
 class Dense:
     layer_instance = []
+    weights_repo = []
     def __init__(self,inputs,neurons=100,layers=4,activation="relu"):
         self.inputs = inputs
         self.neurons = neurons
@@ -42,16 +43,21 @@ class Dense:
         for layer in Dense.layer_instance:
             layer.inputs = output
             output = layer.forward()
-    def backprop(self,LR):
-        #softmax derivative 
-        output_gradient  = 12
+    def backprop(self,x,LR):
+        softmax = lambda x : np.exp(x)/np.sum(np.exp(x))
+        grid = np.indicies(x.shape)
+        output_gradient  = softmax(x)*(np.where(grid[0]==grid[1],1,0))
         for layer in Dense.layer_instance[::-1]:
-            output_gradident = layer.backward(output_gradident)
+            output_gradient = layer.backward(output_gradient)
             del_weights = np.array(layer.delta_weights)
             layer.m = (0.9*layer.m + 0.1*del_weights)/0.1
             layer.v = (0.999*layer.v+0.001*del_weights)/0.001
             layer.weights-=LR*layer.m/(np.sqrt(layer.v)+0.1/10**6)
+            Dense.weights_repo.append(layer.weights)
 
+
+
+            
 
             
 
